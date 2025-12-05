@@ -1,122 +1,13 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fanisana Rakitra FJKM</title>
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-.min-h-screen { min-height: 100vh; }
-.bg-gray-50 { background-color: #f9fafb; }
-.bg-gradient-to-br { background: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
-.from-purple-600 { --tw-gradient-from: #9333ea; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
-.to-purple-900 { --tw-gradient-to: #581c87; }
-.from-purple-600.to-purple-800 { background: linear-gradient(90deg, #9333ea 0%, #6b21a8 100%); }
-.flex { display: flex; }
-.items-center { align-items: center; }
-.justify-center { justify-content: center; }
-.justify-between { justify-content: space-between; }
-.flex-1 { flex: 1; }
-.p-4 { padding: 1rem; }
-.p-6 { padding: 1.5rem; }
-.p-8 { padding: 2rem; }
-.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-.px-4 { padding-left: 1rem; padding-right: 1rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-4 { margin-bottom: 1rem; }
-.mb-6 { margin-bottom: 1.5rem; }
-.mt-1 { margin-top: 0.25rem; }
-.mt-6 { margin-top: 1.5rem; }
-.ml-4 { margin-left: 1rem; }
-.gap-2 { gap: 0.5rem; }
-.gap-3 { gap: 0.75rem; }
-.rounded-lg { border-radius: 0.5rem; }
-.rounded-full { border-radius: 9999px; }
-.shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
-.shadow-md { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-2xl { font-size: 1.5rem; line-height: 2rem; }
-.text-xl { font-size: 1.25rem; }
-.text-lg { font-size: 1.125rem; }
-.text-sm { font-size: 0.875rem; }
-.text-xs { font-size: 0.75rem; }
-.font-bold { font-weight: 700; }
-.font-semibold { font-weight: 600; }
-.text-gray-800 { color: #1f2937; }
-.text-gray-700 { color: #374151; }
-.text-gray-600 { color: #4b5563; }
-.text-gray-500 { color: #6b7280; }
-.text-white { color: #ffffff; }
-.text-purple-600 { color: #9333ea; }
-.text-purple-700 { color: #7e22ce; }
-.text-purple-100 { color: #f3e8ff; }
-.text-blue-600 { color: #2563eb; }
-.text-green-600 { color: #16a34a; }
-.text-red-600 { color: #dc2626; }
-.bg-white { background-color: #ffffff; }
-.bg-purple-600 { background-color: #9333ea; }
-.bg-purple-700 { background-color: #7e22ce; }
-.bg-gray-50 { background-color: #f9fafb; }
-.bg-gray-100 { background-color: #f3f4f6; }
-.bg-blue-100 { background-color: #dbeafe; }
-.bg-green-100 { background-color: #dcfce7; }
-.bg-red-100 { background-color: #fee2e2; }
-.bg-purple-100 { background-color: #f3e8ff; }
-.bg-opacity-20 { --tw-bg-opacity: 0.2; }
-.bg-opacity-30 { --tw-bg-opacity: 0.3; }
-.hover\:bg-purple-700:hover { background-color: #7e22ce; }
-.hover\:bg-blue-200:hover { background-color: #bfdbfe; }
-.hover\:bg-green-200:hover { background-color: #bbf7d0; }
-.hover\:bg-red-200:hover { background-color: #fecaca; }
-.hover\:bg-gray-100:hover { background-color: #f3f4f6; }
-.hover\:bg-opacity-30:hover { --tw-bg-opacity: 0.3; }
-.border { border-width: 1px; }
-.border-2 { border-width: 2px; }
-.border-gray-300 { border-color: #d1d5db; }
-.border-purple-500 { border-color: #a855f7; }
-.border-l-4 { border-left-width: 4px; }
-.border-b { border-bottom-width: 1px; }
-.border-b-2 { border-bottom-width: 2px; }
-.w-full { width: 100%; }
-.max-w-md { max-width: 28rem; }
-.max-w-2xl { max-width: 42rem; }
-.max-w-4xl { max-width: 56rem; }
-.space-y-2 > * + * { margin-top: 0.5rem; }
-.space-y-4 > * + * { margin-top: 1rem; }
-.grid { display: grid; }
-.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-input, select, textarea { width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.5rem; }
-input:focus, select:focus, textarea:focus { outline: 2px solid #9333ea; border-color: #9333ea; }
-button { cursor: pointer; transition: all 0.2s; }
-button:active { transform: scale(0.98); }
-.cursor-pointer { cursor: pointer; }
-.block { display: block; }
-.mx-auto { margin-left: auto; margin-right: auto; }
-details summary { cursor: pointer; list-style: none; }
-details summary::-webkit-details-marker { display: none; }
-</style>
-</head>
-<body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useEffect } = React;
-const { Calendar, Users, Save, History, Download, Trash2 } = lucide;
+import React, { useState, useEffect } from 'react';
+import { Calendar, Users, Save, History, Download, Trash2 } from 'lucide-react';
 
-function App() {
+const AppQueteFJKM = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginCode, setLoginCode] = useState('');
   const [currentTab, setCurrentTab] = useState('decompte');
   const [historique, setHistorique] = useState([]);
   
+  // Code d'accès (à changer pour votre propre code)
   const ACCESS_CODE = '2024FJKM';
   
   const denominations = [
@@ -157,7 +48,8 @@ function App() {
     categorie: '',
     commentaire: ''
   });
-useEffect(() => {
+
+  useEffect(() => {
     const savedAuth = localStorage.getItem('fjkm_quete_auth');
     if (savedAuth === ACCESS_CODE) {
       setIsAuthenticated(true);
@@ -173,6 +65,10 @@ useEffect(() => {
     localStorage.setItem('fjkm_historique_quete', JSON.stringify(historique));
   }, [historique]);
 
+  const calculateTotal = () => {
+    return denominations.reduce((sum, d) => sum + (d.value * (decompte[d.value] || 0)), 0);
+  };
+
   const handleLogin = () => {
     if (loginCode === ACCESS_CODE) {
       setIsAuthenticated(true);
@@ -187,10 +83,6 @@ useEffect(() => {
     setIsAuthenticated(false);
     localStorage.removeItem('fjkm_quete_auth');
     setLoginCode('');
-  };
-
-  const calculateTotal = () => {
-    return denominations.reduce((sum, d) => sum + (d.value * (decompte[d.value] || 0)), 0);
   };
 
   const resetForm = () => {
@@ -293,12 +185,14 @@ useEffect(() => {
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${body}`;
   };
 
+  const filteredHistorique = historique;
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
           <div className="text-center mb-6">
-            <div style={{fontSize: '4rem', marginBottom: '1rem'}}>🙏</div>
+            <div className="text-6xl mb-4">🙏</div>
             <h1 className="text-2xl font-bold text-gray-800 mb-2">Fanisana Rakitra</h1>
             <p className="text-gray-600">FJKM Freiburg Fiderana</p>
           </div>
@@ -311,15 +205,13 @@ useEffect(() => {
               onChange={(e) => setLoginCode(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
               placeholder="Entrez le code"
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-center"
-              style={{fontSize: '1.125rem'}}
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-center text-lg"
             />
           </div>
           
           <button
             onClick={handleLogin}
-            className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-semibold shadow-md"
-            style={{fontSize: '1.125rem'}}
+            className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-semibold text-lg shadow-md"
           >
             Se connecter
           </button>
@@ -336,7 +228,7 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="from-purple-600 to-purple-800 text-white p-4 shadow-lg" style={{background: 'linear-gradient(90deg, #9333ea 0%, #6b21a8 100%)'}}>
+      <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-4 shadow-lg">
         <div className="flex justify-between items-center">
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-center">🙏 Fanisana Rakitra</h1>
@@ -344,8 +236,7 @@ useEffect(() => {
           </div>
           <button
             onClick={handleLogout}
-            className="px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{backgroundColor: 'rgba(255,255,255,0.2)'}}
+            className="bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-2 rounded-lg text-sm font-semibold"
           >
             🚪 Sortir
           </button>
@@ -365,7 +256,9 @@ useEffect(() => {
         >
           📋 Historique
         </button>
-      </div>{currentTab === 'decompte' && (
+      </div>
+
+      {currentTab === 'decompte' && (
         <div className="p-4 max-w-2xl mx-auto">
           <div className="bg-white rounded-lg shadow-md p-6 mb-4">
             <h2 className="text-lg font-bold mb-4 text-gray-800">📅 Informations</h2>
@@ -373,11 +266,15 @@ useEffect(() => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Date</label>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({...formData, date: e.target.value})}
-                />
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({...formData, date: e.target.value})}
+                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
               </div>
 
               <div>
@@ -385,6 +282,7 @@ useEffect(() => {
                 <select
                   value={formData.categorie}
                   onChange={(e) => setFormData({...formData, categorie: e.target.value})}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="">Sélectionner une catégorie</option>
                   {categories.map(cat => (
@@ -395,22 +293,30 @@ useEffect(() => {
 
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Compteur 1 *</label>
-                <input
-                  type="text"
-                  value={formData.compteur1}
-                  onChange={(e) => setFormData({...formData, compteur1: e.target.value})}
-                  placeholder="Nom de la première personne"
-                />
+                <div className="relative">
+                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="text"
+                    value={formData.compteur1}
+                    onChange={(e) => setFormData({...formData, compteur1: e.target.value})}
+                    placeholder="Nom de la première personne"
+                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">Compteur 2 *</label>
-                <input
-                  type="text"
-                  value={formData.compteur2}
-                  onChange={(e) => setFormData({...formData, compteur2: e.target.value})}
-                  placeholder="Nom de la deuxième personne"
-                />
+                <div className="relative">
+                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <input
+                    type="text"
+                    value={formData.compteur2}
+                    onChange={(e) => setFormData({...formData, compteur2: e.target.value})}
+                    placeholder="Nom de la deuxième personne"
+                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
               </div>
 
               <div>
@@ -420,6 +326,7 @@ useEffect(() => {
                   value={formData.recepteur}
                   onChange={(e) => setFormData({...formData, recepteur: e.target.value})}
                   placeholder="Nom de la personne qui reçoit l'argent"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
@@ -430,6 +337,7 @@ useEffect(() => {
                   onChange={(e) => setFormData({...formData, commentaire: e.target.value})}
                   placeholder="Notes ou observations..."
                   rows="3"
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
@@ -440,17 +348,13 @@ useEffect(() => {
             
             <div className="space-y-2">
               {denominations.map(d => (
-                <div key={d.value} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100" style={{transition: 'background 0.2s'}}>
+                <div key={d.value} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                   <div className="flex items-center gap-3">
                     <div 
-                      style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        backgroundColor: d.color
-                      }}
+                      className="w-3 h-3 rounded-full"
+                      style={{backgroundColor: d.color}}
                     />
-                    <span className="font-bold text-gray-800" style={{width: '80px'}}>{d.label}</span>
+                    <span className="font-bold text-gray-800 w-20">{d.label}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <input
@@ -458,9 +362,9 @@ useEffect(() => {
                       min="0"
                       value={decompte[d.value]}
                       onChange={(e) => setDecompte({...decompte, [d.value]: parseInt(e.target.value) || 0})}
-                      style={{width: '80px', textAlign: 'right'}}
+                      className="w-20 px-3 py-2 border rounded-lg text-right focus:ring-2 focus:ring-purple-500"
                     />
-                    <span className="text-gray-600 font-semibold" style={{width: '96px', textAlign: 'right'}}>
+                    <span className="text-gray-600 w-24 text-right font-semibold">
                       {(d.value * (decompte[d.value] || 0)).toFixed(2)} €
                     </span>
                   </div>
@@ -469,23 +373,23 @@ useEffect(() => {
             </div>
           </div>
 
-          <div className="rounded-lg shadow-lg p-6 mb-4 text-white" style={{background: 'linear-gradient(90deg, #9333ea 0%, #7e22ce 100%)'}}>
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg shadow-lg p-6 mb-4">
             <div className="text-center">
               <div className="text-sm font-semibold mb-2">TOTAL</div>
-              <div style={{fontSize: '2.25rem', fontWeight: 'bold'}}>{calculateTotal().toFixed(2)} €</div>
+              <div className="text-4xl font-bold">{calculateTotal().toFixed(2)} €</div>
             </div>
           </div>
 
           <div className="flex gap-3">
             <button
               onClick={saveDecompte}
-              className="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-semibold shadow-md flex items-center justify-center gap-2"
+              className="flex-1 flex items-center justify-center gap-2 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-semibold shadow-md"
             >
-              💾 Enregistrer
+              <Save size={20} /> Enregistrer
             </button>
             <button
               onClick={resetForm}
-              className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-100 font-semibold"
+              className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 font-semibold"
             >
               Réinitialiser
             </button>
@@ -503,17 +407,17 @@ useEffect(() => {
 
             {historique.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
-                <div style={{fontSize: '3rem', marginBottom: '1rem', color: '#d1d5db'}}>📋</div>
+                <History size={48} className="mx-auto mb-4 text-gray-300" />
                 <p className="text-lg">Aucun décompte enregistré</p>
                 <p className="text-sm">Les décomptes apparaîtront ici après enregistrement</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {historique.map(entry => (
+                {filteredHistorique.map(entry => (
                   <div key={entry.id} className="bg-white rounded-lg shadow-md p-4 border-l-4 border-purple-500">
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2" style={{flexWrap: 'wrap'}}>
+                        <div className="flex items-center gap-2 mb-2">
                           <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">
                             {entry.categorie}
                           </span>
@@ -528,7 +432,7 @@ useEffect(() => {
                         </div>
 
                         {entry.commentaire && (
-                          <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded" style={{marginTop: '0.5rem'}}>
+                          <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded mt-2">
                             💬 {entry.commentaire}
                           </div>
                         )}
@@ -544,7 +448,7 @@ useEffect(() => {
                             className="p-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
                             title="Télécharger"
                           >
-                            📥
+                            <Download size={16} />
                           </button>
                           <button
                             onClick={() => sendByEmail(entry)}
@@ -558,17 +462,17 @@ useEffect(() => {
                             className="p-2 bg-red-100 text-red-600 rounded hover:bg-red-200"
                             title="Supprimer"
                           >
-                            🗑️
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </div>
                     </div>
 
-                    <details style={{marginTop: '0.75rem'}}>
-                      <summary className="cursor-pointer text-sm text-purple-600 font-semibold">
+                    <details className="mt-3">
+                      <summary className="cursor-pointer text-sm text-purple-600 font-semibold hover:text-purple-700">
                         Voir le détail du décompte
                       </summary>
-                      <div className="grid grid-cols-2 gap-2 text-xs" style={{marginTop: '0.5rem'}}>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                         {denominations.filter(d => entry.decompte[d.value] > 0).map(d => (
                           <div key={d.value} className="flex justify-between bg-gray-50 p-2 rounded">
                             <span>{d.label} × {entry.decompte[d.value]}</span>
@@ -586,9 +490,6 @@ useEffect(() => {
       )}
     </div>
   );
-}
+};
 
-ReactDOM.render(<App />, document.getElementById('root'));
-</script>
-</body>
-</html>
+export default AppQueteFJKM;
