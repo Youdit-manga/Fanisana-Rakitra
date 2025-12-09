@@ -1,495 +1,1734 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Users, Save, History, Download, Trash2 } from 'lucide-react';
-
-const AppQueteFJKM = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loginCode, setLoginCode] = useState('');
-  const [currentTab, setCurrentTab] = useState('decompte');
-  const [historique, setHistorique] = useState([]);
-  
-  // Code d'accès (à changer pour votre propre code)
-  const ACCESS_CODE = '2024FJKM';
-  
-  const denominations = [
-    { value: 500, label: '500 €', color: '#9C27B0' },
-    { value: 200, label: '200 €', color: '#FFB300' },
-    { value: 100, label: '100 €', color: '#4CAF50' },
-    { value: 50, label: '50 €', color: '#FF9800' },
-    { value: 20, label: '20 €', color: '#2196F3' },
-    { value: 10, label: '10 €', color: '#F44336' },
-    { value: 5, label: '5 €', color: '#9E9E9E' },
-    { value: 2, label: '2 €', color: '#795548' },
-    { value: 1, label: '1 €', color: '#607D8B' },
-    { value: 0.50, label: '0.50 €', color: '#FFC107' },
-    { value: 0.20, label: '0.20 €', color: '#FF5722' },
-    { value: 0.10, label: '0.10 €', color: '#00BCD4' },
-    { value: 0.05, label: '0.05 €', color: '#8BC34A' },
-    { value: 0.02, label: '0.02 €', color: '#CDDC39' },
-    { value: 0.01, label: '0.01 €', color: '#FDD835' }
-  ];
-
-  const categories = [
-    'Rakitra 1',
-    'Rakitra 2',
-    'Rakitra Fandraisana',
-    'Rakitra manokana',
-    'Adidy Mpandray'
-  ];
-
-  const [decompte, setDecompte] = useState(
-    denominations.reduce((acc, d) => ({ ...acc, [d.value]: 0 }), {})
-  );
-
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    compteur1: '',
-    compteur2: '',
-    recepteur: '',
-    categorie: '',
-    commentaire: ''
-  });
-
-  useEffect(() => {
-    const savedAuth = localStorage.getItem('fjkm_quete_auth');
-    if (savedAuth === ACCESS_CODE) {
-      setIsAuthenticated(true);
-    }
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a365d">
+    <title>FJKM Freiburg - Fanisana Rakitra</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     
-    const saved = localStorage.getItem('fjkm_historique_quete');
-    if (saved) {
-      setHistorique(JSON.parse(saved));
-    }
-  }, []);
+    <style>
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2c5282;
+            --accent: #d69e2e;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --warning: #dd6b20;
+            --bg-cream: #faf8f5;
+            --bg-white: #ffffff;
+            --text-dark: #1a202c;
+            --text-muted: #718096;
+            --border: #e2e8f0;
+        }
 
-  useEffect(() => {
-    localStorage.setItem('fjkm_historique_quete', JSON.stringify(historique));
-  }, [historique]);
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  const calculateTotal = () => {
-    return denominations.reduce((sum, d) => sum + (d.value * (decompte[d.value] || 0)), 0);
-  };
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: var(--bg-cream);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
 
-  const handleLogin = () => {
-    if (loginCode === ACCESS_CODE) {
-      setIsAuthenticated(true);
-      localStorage.setItem('fjkm_quete_auth', ACCESS_CODE);
-    } else {
-      alert('Code d\'accès incorrect');
-      setLoginCode('');
-    }
-  };
+        .hidden { display: none !important; }
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('fjkm_quete_auth');
-    setLoginCode('');
-  };
+        /* Login Screen */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        }
 
-  const resetForm = () => {
-    setDecompte(denominations.reduce((acc, d) => ({ ...acc, [d.value]: 0 }), {}));
-    setFormData({
-      date: new Date().toISOString().split('T')[0],
-      compteur1: '',
-      compteur2: '',
-      recepteur: '',
-      categorie: '',
-      commentaire: ''
-    });
-  };
+        .login-logo {
+            width: 100px;
+            height: 100px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
 
-  const saveDecompte = () => {
-    if (!formData.compteur1 || !formData.compteur2 || !formData.recepteur || !formData.categorie) {
-      alert('Veuillez remplir tous les champs obligatoires');
-      return;
-    }
+        .login-title {
+            font-family: 'Playfair Display', serif;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
 
-    const total = calculateTotal();
-    if (total === 0) {
-      alert('Le total est 0 €. Veuillez entrer des montants.');
-      return;
-    }
+        .login-subtitle {
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
 
-    const newEntry = {
-      id: Date.now(),
-      ...formData,
-      decompte: {...decompte},
-      total: total,
-      timestamp: new Date().toISOString()
-    };
+        .login-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
 
-    setHistorique([newEntry, ...historique]);
-    alert('Décompte enregistré avec succès !');
-    resetForm();
-  };
+        .pin-display {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
 
-  const deleteEntry = (id) => {
-    if (window.confirm('Supprimer ce décompte ?')) {
-      setHistorique(historique.filter(h => h.id !== id));
-    }
-  };
+        .pin-dot {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            background: white;
+        }
 
-  const generatePDFContent = (entry) => {
-    const date = new Date(entry.date).toLocaleDateString('fr-FR');
-    let content = `DÉCOMPTE DE QUÊTE - FJKM FREIBURG\n`;
-    content += `${'='.repeat(50)}\n\n`;
-    content += `Date: ${date}\n`;
-    content += `Catégorie: ${entry.categorie}\n\n`;
-    content += `Compteurs:\n`;
-    content += `  - ${entry.compteur1}\n`;
-    content += `  - ${entry.compteur2}\n\n`;
-    content += `Récepteur: ${entry.recepteur}\n\n`;
-    content += `${'-'.repeat(50)}\n`;
-    content += `DÉTAIL DES BILLETS ET PIÈCES\n`;
-    content += `${'-'.repeat(50)}\n\n`;
-    
-    denominations.forEach(d => {
-      if (entry.decompte[d.value] > 0) {
-        const subtotal = d.value * entry.decompte[d.value];
-        content += `${d.label.padEnd(10)} × ${String(entry.decompte[d.value]).padStart(3)} = ${subtotal.toFixed(2).padStart(10)} €\n`;
-      }
-    });
-    
-    content += `\n${'='.repeat(50)}\n`;
-    content += `TOTAL: ${entry.total.toFixed(2)} €\n`;
-    content += `${'='.repeat(50)}\n\n`;
-    
-    if (entry.commentaire) {
-      content += `Commentaire:\n${entry.commentaire}\n\n`;
-    }
-    
-    content += `Enregistré le: ${new Date(entry.timestamp).toLocaleString('fr-FR')}\n`;
-    
-    return content;
-  };
+        .pin-dot.filled {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
 
-  const downloadPDF = (entry) => {
-    const date = new Date(entry.date).toLocaleDateString('fr-FR');
-    const content = generatePDFContent(entry);
-    
-    const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `quete_${entry.categorie.replace(/\s+/g, '_')}_${date.replace(/\//g, '-')}.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+        .pin-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
 
-  const sendByEmail = (entry) => {
-    const date = new Date(entry.date).toLocaleDateString('fr-FR');
-    const content = generatePDFContent(entry);
-    
-    const subject = `Décompte Quête - ${entry.categorie} - ${date}`;
-    const body = encodeURIComponent(content);
-    
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${body}`;
-  };
+        .pin-key {
+            padding: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: var(--bg-cream);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-  const filteredHistorique = historique;
+        .pin-key:active {
+            background: var(--primary);
+            color: white;
+            transform: scale(0.95);
+        }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full">
-          <div className="text-center mb-6">
-            <div className="text-6xl mb-4">🙏</div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">Fanisana Rakitra</h1>
-            <p className="text-gray-600">FJKM Freiburg Fiderana</p>
-          </div>
-          
-          <div className="mb-6">
-            <label className="block text-sm font-semibold mb-2 text-gray-700">Code d'accès</label>
-            <input
-              type="password"
-              value={loginCode}
-              onChange={(e) => setLoginCode(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-              placeholder="Entrez le code"
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-center text-lg"
-            />
-          </div>
-          
-          <button
-            onClick={handleLogin}
-            className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-semibold text-lg shadow-md"
-          >
-            Se connecter
-          </button>
-          
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              🔒 Accès réservé aux membres autorisés
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+        .pin-key.danger { background: #fed7d7; color: var(--danger); }
+        .pin-key.success { background: #c6f6d5; color: var(--success); }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-4 shadow-lg">
-        <div className="flex justify-between items-center">
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-center">🙏 Fanisana Rakitra</h1>
-            <p className="text-center text-purple-100 text-sm mt-1">FJKM Freiburg Fiderana</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-2 rounded-lg text-sm font-semibold"
-          >
-            🚪 Sortir
-          </button>
-        </div>
-      </div>
+        .login-error {
+            color: var(--danger);
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
 
-      <div className="flex border-b bg-white">
-        <button
-          onClick={() => setCurrentTab('decompte')}
-          className={`flex-1 py-3 font-semibold ${currentTab === 'decompte' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500'}`}
-        >
-          💶 Décompte
-        </button>
-        <button
-          onClick={() => setCurrentTab('historique')}
-          className={`flex-1 py-3 font-semibold ${currentTab === 'historique' ? 'border-b-2 border-purple-600 text-purple-600' : 'text-gray-500'}`}
-        >
-          📋 Historique
-        </button>
-      </div>
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
 
-      {currentTab === 'decompte' && (
-        <div className="p-4 max-w-2xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-6 mb-4">
-            <h2 className="text-lg font-bold mb-4 text-gray-800">📅 Informations</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Date</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-              </div>
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Catégorie *</label>
-                <select
-                  value={formData.categorie}
-                  onChange={(e) => setFormData({...formData, categorie: e.target.value})}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-                >
-                  <option value="">Sélectionner une catégorie</option>
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
+        .header-title h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+        }
 
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Compteur 1 *</label>
-                <div className="relative">
-                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="text"
-                    value={formData.compteur1}
-                    onChange={(e) => setFormData({...formData, compteur1: e.target.value})}
-                    placeholder="Nom de la première personne"
-                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-              </div>
+        .header-title p { font-size: 0.8rem; opacity: 0.9; }
 
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Compteur 2 *</label>
-                <div className="relative">
-                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="text"
-                    value={formData.compteur2}
-                    onChange={(e) => setFormData({...formData, compteur2: e.target.value})}
-                    placeholder="Nom de la deuxième personne"
-                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-              </div>
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Récepteur *</label>
-                <input
-                  type="text"
-                  value={formData.recepteur}
-                  onChange={(e) => setFormData({...formData, recepteur: e.target.value})}
-                  placeholder="Nom de la personne qui reçoit l'argent"
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
+        .user-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
 
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">Commentaire</label>
-                <textarea
-                  value={formData.commentaire}
-                  onChange={(e) => setFormData({...formData, commentaire: e.target.value})}
-                  placeholder="Notes ou observations..."
-                  rows="3"
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
+        .user-badge.admin {
+            background: var(--accent);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: var(--bg-white);
+            border-bottom: 2px solid var(--border);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: none;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--accent);
+        }
+
+        /* Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: 2rem;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Cards */
+        .card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-header.success { background: var(--success); }
+        .card-header.warning { background: var(--warning); }
+
+        .card-body { padding: 1rem; }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Money Grid */
+        .money-grid {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .money-row { display: contents; }
+
+        .money-label {
+            font-weight: 600;
+            padding: 0.5rem;
+            background: var(--bg-cream);
+            border-radius: 8px;
+            text-align: center;
+            min-width: 70px;
+        }
+
+        .money-label.bill { background: #c6f6d5; color: #276749; }
+        .money-label.coin { background: #feebc8; color: #c05621; }
+
+        .money-input {
+            width: 80px;
+            padding: 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .money-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .money-total {
+            font-weight: 700;
+            color: var(--primary);
+            text-align: right;
+            min-width: 80px;
+        }
+
+        /* Total Section */
+        .total-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .total-label { font-size: 1rem; opacity: 0.9; margin-bottom: 0.5rem; }
+        .total-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        /* Signature Section */
+        .signature-section { margin-bottom: 1.5rem; }
+
+        .signature-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .signature-name { font-weight: 600; color: var(--primary); }
+
+        .signature-clear {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .signature-pad {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            background: #fafafa;
+            touch-action: none;
+            cursor: crosshair;
+            width: 100%;
+            height: 80px;
+        }
+
+        .signature-pad.signed {
+            border-color: var(--success);
+            border-style: solid;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: white; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-block { width: 100%; }
+        .btn:active { transform: scale(0.98); }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* History List */
+        .history-item {
+            background: var(--bg-cream);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid var(--success);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-date {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .history-amount {
+            font-weight: 700;
+            color: var(--success);
+            font-size: 1.1rem;
+        }
+
+        .history-category {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .history-people {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* User List */
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg-cream);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-info { display: flex; align-items: center; gap: 0.5rem; }
+
+        .user-role {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background: var(--primary);
+            color: white;
+        }
+
+        .user-role.admin { background: var(--accent); color: var(--primary); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 { font-size: 1.1rem; }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body { padding: 1rem; }
+
+        /* Detail View */
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: var(--text-muted); }
+        .detail-value { font-weight: 600; }
+
+        .signature-preview {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            background: #fafafa;
+        }
+
+        .signature-preview img {
+            max-width: 100%;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-dark);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            z-index: 2000;
+            animation: slideUp 0.3s ease;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+        /* Print styles */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .card { box-shadow: none; border: 1px solid #ddd; }
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .money-label { min-width: 60px; font-size: 0.9rem; }
+            .money-input { width: 60px; }
+            .money-total { min-width: 70px; font-size: 0.9rem; }
+            .nav-tab { font-size: 0.8rem; padding: 0.6rem 0.4rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-logo">⛪</div>
+        <h1 class="login-title">FJKM Freiburg Fiderana</h1>
+        <p class="login-subtitle">Fanisana Rakitra</p>
+        
+        <div class="login-box">
+            <p style="text-align: center; margin-bottom: 1rem; color: var(--text-muted);">Ampidiro ny kaodin'accès</p>
+            <div class="pin-display">
+                <div class="pin-dot" id="dot0"></div>
+                <div class="pin-dot" id="dot1"></div>
+                <div class="pin-dot" id="dot2"></div>
+                <div class="pin-dot" id="dot3"></div>
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6 mb-4">
-            <h2 className="text-lg font-bold mb-4 text-gray-800">💰 Décompte des Billets et Pièces</h2>
-            
-            <div className="space-y-2">
-              {denominations.map(d => (
-                <div key={d.value} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-3 h-3 rounded-full"
-                      style={{backgroundColor: d.color}}
-                    />
-                    <span className="font-bold text-gray-800 w-20">{d.label}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="number"
-                      min="0"
-                      value={decompte[d.value]}
-                      onChange={(e) => setDecompte({...decompte, [d.value]: parseInt(e.target.value) || 0})}
-                      className="w-20 px-3 py-2 border rounded-lg text-right focus:ring-2 focus:ring-purple-500"
-                    />
-                    <span className="text-gray-600 w-24 text-right font-semibold">
-                      {(d.value * (decompte[d.value] || 0)).toFixed(2)} €
-                    </span>
-                  </div>
-                </div>
-              ))}
+            <div class="pin-keypad">
+                <button class="pin-key" onclick="addPin('1')">1</button>
+                <button class="pin-key" onclick="addPin('2')">2</button>
+                <button class="pin-key" onclick="addPin('3')">3</button>
+                <button class="pin-key" onclick="addPin('4')">4</button>
+                <button class="pin-key" onclick="addPin('5')">5</button>
+                <button class="pin-key" onclick="addPin('6')">6</button>
+                <button class="pin-key" onclick="addPin('7')">7</button>
+                <button class="pin-key" onclick="addPin('8')">8</button>
+                <button class="pin-key" onclick="addPin('9')">9</button>
+                <button class="pin-key danger" onclick="clearPin()">✕</button>
+                <button class="pin-key" onclick="addPin('0')">0</button>
+                <button class="pin-key success" onclick="submitPin()">✓</button>
             </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg shadow-lg p-6 mb-4">
-            <div className="text-center">
-              <div className="text-sm font-semibold mb-2">TOTAL</div>
-              <div className="text-4xl font-bold">{calculateTotal().toFixed(2)} €</div>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={saveDecompte}
-              className="flex-1 flex items-center justify-center gap-2 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-semibold shadow-md"
-            >
-              <Save size={20} /> Enregistrer
-            </button>
-            <button
-              onClick={resetForm}
-              className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 font-semibold"
-            >
-              Réinitialiser
-            </button>
-          </div>
+            <p id="loginError" class="login-error hidden"></p>
         </div>
-      )}
-
-      {currentTab === 'historique' && (
-        <div className="p-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="mb-4">
-              <h2 className="text-xl font-bold text-gray-800">📋 Historique des Décomptes</h2>
-              <p className="text-sm text-gray-600">{historique.length} décompte(s) enregistré(s)</p>
-            </div>
-
-            {historique.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <History size={48} className="mx-auto mb-4 text-gray-300" />
-                <p className="text-lg">Aucun décompte enregistré</p>
-                <p className="text-sm">Les décomptes apparaîtront ici après enregistrement</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredHistorique.map(entry => (
-                  <div key={entry.id} className="bg-white rounded-lg shadow-md p-4 border-l-4 border-purple-500">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">
-                            {entry.categorie}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {new Date(entry.date).toLocaleDateString('fr-FR')}
-                          </span>
-                        </div>
-                        
-                        <div className="text-sm text-gray-700 space-y-1 mb-2">
-                          <div><span className="font-semibold">Compteurs:</span> {entry.compteur1}, {entry.compteur2}</div>
-                          <div><span className="font-semibold">Récepteur:</span> {entry.recepteur}</div>
-                        </div>
-
-                        {entry.commentaire && (
-                          <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded mt-2">
-                            💬 {entry.commentaire}
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="text-right ml-4">
-                        <div className="text-2xl font-bold text-purple-600 mb-2">
-                          {entry.total.toFixed(2)} €
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => downloadPDF(entry)}
-                            className="p-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
-                            title="Télécharger"
-                          >
-                            <Download size={16} />
-                          </button>
-                          <button
-                            onClick={() => sendByEmail(entry)}
-                            className="p-2 bg-green-100 text-green-600 rounded hover:bg-green-200"
-                            title="Envoyer par email"
-                          >
-                            📧
-                          </button>
-                          <button
-                            onClick={() => deleteEntry(entry.id)}
-                            className="p-2 bg-red-100 text-red-600 rounded hover:bg-red-200"
-                            title="Supprimer"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <details className="mt-3">
-                      <summary className="cursor-pointer text-sm text-purple-600 font-semibold hover:text-purple-700">
-                        Voir le détail du décompte
-                      </summary>
-                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                        {denominations.filter(d => entry.decompte[d.value] > 0).map(d => (
-                          <div key={d.value} className="flex justify-between bg-gray-50 p-2 rounded">
-                            <span>{d.label} × {entry.decompte[d.value]}</span>
-                            <span className="font-semibold">{(d.value * entry.decompte[d.value]).toFixed(2)} €</span>
-                          </div>
-                        ))}
-                      </div>
-                    </details>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
-  );
-};
 
-export default AppQueteFJKM;
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>⛪ FJKM Freiburg</h1>
+                    <p>Fanisana Rakitra</p>
+                </div>
+                <div class="header-user">
+                    <span class="user-badge" id="userBadge">Mpanisa</span>
+                    <button class="logout-btn" onclick="openChangeMyPinModal()" title="Hanova ny kaody">🔑</button>
+                    <button class="logout-btn" onclick="logout()" title="Hivoaka">🚪</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-tabs no-print">
+            <button class="nav-tab active" data-tab="count">💶 Fanisana</button>
+            <button class="nav-tab" data-tab="history">📋 Tantara</button>
+            <button class="nav-tab" data-tab="admin" id="adminTab">⚙️ Admin</button>
+        </div>
+
+        <div class="container">
+            <!-- Counting Tab -->
+            <div id="tab-count" class="tab-content active">
+                <!-- Date and Category -->
+                <div class="card">
+                    <div class="card-header">📅 Fampahalalana</div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Daty</label>
+                            <input type="date" class="form-control" id="dateInput">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Sokajy (Karazana rakitra)</label>
+                            <input type="text" class="form-control" id="categoryInput" placeholder="Ohatra: Rakitra I, Rakitra II...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bills -->
+                <div class="card">
+                    <div class="card-header">💶 Taratasy (Billets)</div>
+                    <div class="card-body">
+                        <div class="money-grid" id="billsGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Coins -->
+                <div class="card">
+                    <div class="card-header">🪙 Vola madinika (Pièces)</div>
+                    <div class="card-body">
+                        <div class="money-grid" id="coinsGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="total-section">
+                    <div class="total-label">TOTALIN'NY RAKITRA</div>
+                    <div class="total-amount" id="grandTotal">0,00 €</div>
+                </div>
+
+                <!-- Signatures -->
+                <div class="card">
+                    <div class="card-header">✍️ Sonia</div>
+                    <div class="card-body">
+                        <!-- Comptable 1 -->
+                        <div class="signature-section">
+                            <div class="form-group">
+                                <label>Anaran'ny Mpanisa 1</label>
+                                <input type="text" class="form-control" id="comptable1Name" placeholder="Anaran'ny mpanisa voalohany">
+                            </div>
+                            <div class="signature-header">
+                                <span class="signature-name">Sonian'ny Mpanisa 1</span>
+                                <button class="signature-clear" onclick="clearSignature('sig1')">🗑️ Fafao</button>
+                            </div>
+                            <canvas id="sig1" class="signature-pad"></canvas>
+                        </div>
+
+                        <!-- Comptable 2 -->
+                        <div class="signature-section">
+                            <div class="form-group">
+                                <label>Anaran'ny Mpanisa 2</label>
+                                <input type="text" class="form-control" id="comptable2Name" placeholder="Anaran'ny mpanisa faharoa">
+                            </div>
+                            <div class="signature-header">
+                                <span class="signature-name">Sonian'ny Mpanisa 2</span>
+                                <button class="signature-clear" onclick="clearSignature('sig2')">🗑️ Fafao</button>
+                            </div>
+                            <canvas id="sig2" class="signature-pad"></canvas>
+                        </div>
+
+                        <!-- Receiver -->
+                        <div class="signature-section" style="margin-bottom: 0;">
+                            <div class="form-group">
+                                <label>Anaran'ny Mpandray vola</label>
+                                <input type="text" class="form-control" id="receiverName" placeholder="Anaran'ny mpandray ny vola">
+                            </div>
+                            <div class="signature-header">
+                                <span class="signature-name">Sonian'ny Mpandray vola</span>
+                                <button class="signature-clear" onclick="clearSignature('sig3')">🗑️ Fafao</button>
+                            </div>
+                            <canvas id="sig3" class="signature-pad"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card no-print">
+                    <div class="card-body">
+                        <div class="btn-group" style="justify-content: center;">
+                            <button class="btn btn-success" onclick="saveCollection()">💾 Tehirizo</button>
+                            <button class="btn btn-primary" onclick="saveAsPDF()">📄 PDF</button>
+                            <button class="btn btn-danger" onclick="resetForm()">🔄 Avereno</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Tab -->
+            <div id="tab-history" class="tab-content">
+                <div class="card">
+                    <div class="card-header">📋 Tantaran'ny Rakitra</div>
+                    <div class="card-body">
+                        <div id="historyList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Tab -->
+            <div id="tab-admin" class="tab-content">
+                <!-- Users Management -->
+                <div class="card">
+                    <div class="card-header">👥 Mpampiasa</div>
+                    <div class="card-body">
+                        <button class="btn btn-primary btn-block" onclick="openAddUserModal()" style="margin-bottom: 1rem;">
+                            + Hanampy mpampiasa vaovao
+                        </button>
+                        <div id="usersList"></div>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="card">
+                    <div class="card-header success">📊 Statistika</div>
+                    <div class="card-body">
+                        <div id="statsContent"></div>
+                    </div>
+                </div>
+
+                <!-- Export All -->
+                <div class="card">
+                    <div class="card-header warning">📤 Export</div>
+                    <div class="card-body">
+                        <button class="btn btn-warning btn-block" onclick="exportAllHistory()">
+                            📥 Tehirizo tantara rehetra (PDF)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal-overlay" id="addUserModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>👤 Mpampiasa vaovao</h3>
+                <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="form-group">
+                        <label>Anarana *</label>
+                        <input type="text" class="form-control" id="newUserName" required placeholder="Anaran'ny mpampiasa">
+                    </div>
+                    <div class="form-group">
+                        <label>Kaody PIN (4 chiffres) *</label>
+                        <input type="text" class="form-control" id="newUserPin" required maxlength="4" pattern="[0-9]{4}" placeholder="0000" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label>Andraikitra</label>
+                        <select class="form-control" id="newUserRole">
+                            <option value="user">Mpanisa (User)</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block">💾 Tehirizo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collection Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📋 Antsipirihan'ny Rakitra</h3>
+                <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="detailContent"></div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal-overlay" id="editUserModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>✏️ Hanova mpampiasa</h3>
+                <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="form-group">
+                        <label>Anarana</label>
+                        <input type="text" class="form-control" id="editUserName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Kaody PIN vaovao (4 chiffres)</label>
+                        <input type="text" class="form-control" id="editUserPin" maxlength="4" pattern="[0-9]{4}" placeholder="Aveao banga raha tsy ovaina" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label>Andraikitra</label>
+                        <select class="form-control" id="editUserRole">
+                            <option value="user">Mpanisa (User)</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block">💾 Tehirizo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change My PIN Modal -->
+    <div class="modal-overlay" id="changeMyPinModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>🔑 Hanova ny kaody PIN</h3>
+                <button class="modal-close" onclick="closeModal('changeMyPinModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="changeMyPinForm">
+                    <div class="form-group">
+                        <label>Kaody PIN ankehitriny</label>
+                        <input type="password" class="form-control" id="currentPin" required maxlength="4" pattern="[0-9]{4}" placeholder="****" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label>Kaody PIN vaovao (4 chiffres)</label>
+                        <input type="text" class="form-control" id="newMyPin" required maxlength="4" pattern="[0-9]{4}" placeholder="0000" inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label>Avereno ny kaody vaovao</label>
+                        <input type="text" class="form-control" id="confirmMyPin" required maxlength="4" pattern="[0-9]{4}" placeholder="0000" inputmode="numeric">
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block">💾 Tehirizo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // ==================== DATA ====================
+        const BILLS = [
+            { value: 500, label: '500 €' },
+            { value: 200, label: '200 €' },
+            { value: 100, label: '100 €' },
+            { value: 50, label: '50 €' },
+            { value: 20, label: '20 €' },
+            { value: 10, label: '10 €' },
+            { value: 5, label: '5 €' }
+        ];
+
+        const COINS = [
+            { value: 2, label: '2 €' },
+            { value: 1, label: '1 €' },
+            { value: 0.50, label: '0,50 €' },
+            { value: 0.20, label: '0,20 €' },
+            { value: 0.10, label: '0,10 €' },
+            { value: 0.05, label: '0,05 €' },
+            { value: 0.02, label: '0,02 €' },
+            { value: 0.01, label: '0,01 €' }
+        ];
+
+        // Default admin user
+        const DEFAULT_USERS = [
+            { id: 'admin1', name: 'Admin', pin: '1234', role: 'admin' }
+        ];
+
+        // ==================== STATE ====================
+        let currentUser = null;
+        let pinInput = '';
+        let counts = {};
+        let signatures = { sig1: null, sig2: null, sig3: null };
+
+        // ==================== STORAGE ====================
+        function getUsers() {
+            const stored = localStorage.getItem('fjkm_rakitra_users');
+            return stored ? JSON.parse(stored) : DEFAULT_USERS;
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('fjkm_rakitra_users', JSON.stringify(users));
+        }
+
+        function getHistory() {
+            const stored = localStorage.getItem('fjkm_rakitra_history');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveHistory(history) {
+            localStorage.setItem('fjkm_rakitra_history', JSON.stringify(history));
+        }
+
+        // ==================== LOGIN ====================
+        function addPin(digit) {
+            if (pinInput.length < 4) {
+                pinInput += digit;
+                updatePinDisplay();
+            }
+        }
+
+        function clearPin() {
+            pinInput = '';
+            updatePinDisplay();
+            document.getElementById('loginError').classList.add('hidden');
+        }
+
+        function updatePinDisplay() {
+            for (let i = 0; i < 4; i++) {
+                const dot = document.getElementById(`dot${i}`);
+                dot.classList.toggle('filled', i < pinInput.length);
+            }
+        }
+
+        function submitPin() {
+            if (pinInput.length !== 4) return;
+
+            const users = getUsers();
+            const user = users.find(u => u.pin === pinInput);
+
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                initApp();
+            } else {
+                document.getElementById('loginError').textContent = '❌ Kaody tsy mety!';
+                document.getElementById('loginError').classList.remove('hidden');
+                pinInput = '';
+                updatePinDisplay();
+            }
+        }
+
+        function logout() {
+            if (confirm('Hivoaka marina ve?')) {
+                currentUser = null;
+                pinInput = '';
+                updatePinDisplay();
+                document.getElementById('mainApp').classList.add('hidden');
+                document.getElementById('loginScreen').classList.remove('hidden');
+            }
+        }
+
+        // ==================== APP INIT ====================
+        function initApp() {
+            // Update user badge
+            const badge = document.getElementById('userBadge');
+            badge.textContent = currentUser.name;
+            badge.classList.toggle('admin', currentUser.role === 'admin');
+
+            // Show/hide admin tab
+            document.getElementById('adminTab').classList.toggle('hidden', currentUser.role !== 'admin');
+
+            // Set today's date
+            document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+
+            // Render money grids
+            renderMoneyGrids();
+
+            // Init signature pads
+            initAllSignaturePads();
+
+            // Setup tabs
+            setupTabs();
+
+            // Load data
+            loadHistory();
+            if (currentUser.role === 'admin') {
+                loadUsers();
+                loadStats();
+            }
+        }
+
+        function renderMoneyGrids() {
+            const billsGrid = document.getElementById('billsGrid');
+            const coinsGrid = document.getElementById('coinsGrid');
+            
+            billsGrid.innerHTML = '';
+            coinsGrid.innerHTML = '';
+
+            BILLS.forEach(bill => {
+                counts[bill.value] = 0;
+                billsGrid.innerHTML += createMoneyRow(bill, 'bill');
+            });
+
+            COINS.forEach(coin => {
+                counts[coin.value] = 0;
+                coinsGrid.innerHTML += createMoneyRow(coin, 'coin');
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.money-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.dataset.value);
+                    counts[value] = parseInt(e.target.value) || 0;
+                    updateTotal(value);
+                    calculateGrandTotal();
+                });
+            });
+        }
+
+        function createMoneyRow(item, type) {
+            return `
+                <div class="money-row">
+                    <div class="money-label ${type}">${item.label}</div>
+                    <input type="number" class="money-input" id="input_${item.value}" 
+                           data-value="${item.value}" min="0" value="0" inputmode="numeric">
+                    <div class="money-total" id="total_${item.value}">0,00 €</div>
+                </div>
+            `;
+        }
+
+        function updateTotal(value) {
+            const count = counts[value] || 0;
+            const total = count * value;
+            document.getElementById(`total_${value}`).textContent = formatCurrency(total);
+        }
+
+        function calculateGrandTotal() {
+            let total = 0;
+            Object.keys(counts).forEach(value => {
+                total += counts[value] * parseFloat(value);
+            });
+            document.getElementById('grandTotal').textContent = formatCurrency(total);
+            return total;
+        }
+
+        function formatCurrency(amount) {
+            return amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // ==================== TABS ====================
+        function setupTabs() {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(`tab-${tabName}`).classList.add('active');
+
+                    if (tabName === 'history') loadHistory();
+                    if (tabName === 'admin' && currentUser.role === 'admin') {
+                        loadUsers();
+                        loadStats();
+                    }
+                });
+            });
+        }
+
+        // ==================== SIGNATURE PADS ====================
+        function initAllSignaturePads() {
+            ['sig1', 'sig2', 'sig3'].forEach(id => {
+                initSignaturePad(id);
+            });
+        }
+
+        function initSignaturePad(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = 80;
+
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                
+                if (e.touches) {
+                    return {
+                        x: (e.touches[0].clientX - rect.left) * scaleX,
+                        y: (e.touches[0].clientY - rect.top) * scaleY
+                    };
+                }
+                return {
+                    x: (e.clientX - rect.left) * scaleX,
+                    y: (e.clientY - rect.top) * scaleY
+                };
+            }
+
+            function startDrawing(e) {
+                e.preventDefault();
+                isDrawing = true;
+                const pos = getPos(e);
+                lastX = pos.x;
+                lastY = pos.y;
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.strokeStyle = '#1a365d';
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+                
+                lastX = pos.x;
+                lastY = pos.y;
+                
+                canvas.classList.add('signed');
+                signatures[canvasId] = canvas.toDataURL();
+            }
+
+            function stopDrawing() {
+                isDrawing = false;
+            }
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function clearSignature(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.classList.remove('signed');
+            signatures[canvasId] = null;
+        }
+
+        // ==================== SAVE COLLECTION ====================
+        function saveCollection() {
+            const date = document.getElementById('dateInput').value;
+            const category = document.getElementById('categoryInput').value || 'Tsy voafaritra';
+            const comptable1 = document.getElementById('comptable1Name').value || '-';
+            const comptable2 = document.getElementById('comptable2Name').value || '-';
+            const receiver = document.getElementById('receiverName').value || '-';
+            const total = calculateGrandTotal();
+
+            if (total === 0) {
+                showToast('Tsy misy vola voaisa!', 'error');
+                return;
+            }
+
+            // Build details
+            const details = {};
+            [...BILLS, ...COINS].forEach(item => {
+                if (counts[item.value] > 0) {
+                    details[item.value] = {
+                        count: counts[item.value],
+                        subtotal: counts[item.value] * item.value
+                    };
+                }
+            });
+
+            const collection = {
+                id: Date.now().toString(),
+                date,
+                category,
+                total,
+                details,
+                comptable1,
+                comptable2,
+                receiver,
+                signatures: { ...signatures },
+                createdBy: currentUser.name,
+                createdAt: new Date().toISOString()
+            };
+
+            const history = getHistory();
+            history.unshift(collection);
+            saveHistory(history);
+
+            showToast('Rakitra voatahiry!', 'success');
+            loadHistory();
+        }
+
+        // ==================== HISTORY ====================
+        function loadHistory() {
+            const history = getHistory();
+            const container = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>Tsy mbola misy rakitra voatahiry</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item" onclick="showDetail('${item.id}')">
+                    <div class="history-header">
+                        <div>
+                            <div class="history-date">${formatDate(item.date)}</div>
+                            <div class="history-category">${item.category}</div>
+                        </div>
+                        <div class="history-amount">${formatCurrency(item.total)}</div>
+                    </div>
+                    <div class="history-people">
+                        👥 ${item.comptable1}, ${item.comptable2} → ${item.receiver}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showDetail(id) {
+            const history = getHistory();
+            const item = history.find(h => h.id === id);
+            if (!item) return;
+
+            let detailsHtml = '';
+            if (item.details) {
+                detailsHtml = '<h4 style="margin: 1rem 0 0.5rem;">💶 Antsipiriany:</h4>';
+                Object.keys(item.details).forEach(value => {
+                    const d = item.details[value];
+                    const label = parseFloat(value) >= 5 ? `${value} €` : `${parseFloat(value).toFixed(2).replace('.', ',')} €`;
+                    detailsHtml += `<div class="detail-row"><span>${label} × ${d.count}</span><span class="detail-value">${formatCurrency(d.subtotal)}</span></div>`;
+                });
+            }
+
+            let signaturesHtml = '<h4 style="margin: 1rem 0 0.5rem;">✍️ Sonia:</h4>';
+            if (item.signatures) {
+                if (item.signatures.sig1) {
+                    signaturesHtml += `<div><strong>${item.comptable1}</strong><div class="signature-preview"><img src="${item.signatures.sig1}" alt="Signature"></div></div>`;
+                }
+                if (item.signatures.sig2) {
+                    signaturesHtml += `<div><strong>${item.comptable2}</strong><div class="signature-preview"><img src="${item.signatures.sig2}" alt="Signature"></div></div>`;
+                }
+                if (item.signatures.sig3) {
+                    signaturesHtml += `<div><strong>${item.receiver}</strong><div class="signature-preview"><img src="${item.signatures.sig3}" alt="Signature"></div></div>`;
+                }
+            }
+
+            document.getElementById('detailContent').innerHTML = `
+                <div class="detail-row"><span class="detail-label">Daty</span><span class="detail-value">${formatDate(item.date)}</span></div>
+                <div class="detail-row"><span class="detail-label">Sokajy</span><span class="detail-value">${item.category}</span></div>
+                <div class="detail-row"><span class="detail-label">Mpanisa 1</span><span class="detail-value">${item.comptable1}</span></div>
+                <div class="detail-row"><span class="detail-label">Mpanisa 2</span><span class="detail-value">${item.comptable2}</span></div>
+                <div class="detail-row"><span class="detail-label">Mpandray</span><span class="detail-value">${item.receiver}</span></div>
+                <div class="detail-row" style="background: var(--success); color: white; border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                    <span>TOTALY</span><span style="font-size: 1.3rem; font-weight: 700;">${formatCurrency(item.total)}</span>
+                </div>
+                ${detailsHtml}
+                ${signaturesHtml}
+                <div style="margin-top: 1rem;">
+                    <button class="btn btn-primary btn-block" onclick="downloadPDF('${item.id}')">📄 Tehirizo PDF</button>
+                    ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-block" style="margin-top: 0.5rem;" onclick="deleteCollection('${item.id}')">🗑️ Fafao</button>` : ''}
+                </div>
+            `;
+
+            openModal('detailModal');
+        }
+
+        function deleteCollection(id) {
+            if (!confirm('Hamafa ity rakitra ity?')) return;
+            
+            let history = getHistory();
+            history = history.filter(h => h.id !== id);
+            saveHistory(history);
+            
+            closeModal('detailModal');
+            loadHistory();
+            showToast('Rakitra voafafa', 'success');
+        }
+
+        // ==================== USERS MANAGEMENT ====================
+        function loadUsers() {
+            const users = getUsers();
+            const container = document.getElementById('usersList');
+
+            container.innerHTML = users.map(user => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <span>${user.name}</span>
+                        <span class="user-role ${user.role}">${user.role === 'admin' ? 'Admin' : 'Mpanisa'}</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary btn-sm" onclick="openEditUserModal('${user.id}')" title="Hanova">✏️</button>
+                        ${user.id !== 'admin1' ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${user.id}')" title="Hamafa">🗑️</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openEditUserModal(userId) {
+            const users = getUsers();
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editUserName').value = user.name;
+            document.getElementById('editUserPin').value = '';
+            document.getElementById('editUserRole').value = user.role;
+            
+            openModal('editUserModal');
+        }
+
+        document.getElementById('editUserForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('editUserId').value;
+            const name = document.getElementById('editUserName').value.trim();
+            const newPin = document.getElementById('editUserPin').value;
+            const role = document.getElementById('editUserRole').value;
+
+            const users = getUsers();
+            const userIndex = users.findIndex(u => u.id === userId);
+            if (userIndex === -1) return;
+
+            // Update name and role
+            users[userIndex].name = name;
+            users[userIndex].role = role;
+
+            // Update PIN only if provided
+            if (newPin) {
+                if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+                    showToast('Kaody PIN dia 4 chiffres!', 'error');
+                    return;
+                }
+                
+                // Check if PIN already exists for another user
+                if (users.find(u => u.pin === newPin && u.id !== userId)) {
+                    showToast('Efa misy io kaody io!', 'error');
+                    return;
+                }
+                
+                users[userIndex].pin = newPin;
+            }
+
+            saveUsers(users);
+            closeModal('editUserModal');
+            loadUsers();
+            showToast(`Mpampiasa "${name}" voaova!`, 'success');
+
+            // Update current user badge if editing self
+            if (userId === currentUser.id) {
+                currentUser = users[userIndex];
+                document.getElementById('userBadge').textContent = currentUser.name;
+            }
+        });
+
+        // ==================== CHANGE MY PIN ====================
+        function openChangeMyPinModal() {
+            document.getElementById('changeMyPinForm').reset();
+            openModal('changeMyPinModal');
+        }
+
+        document.getElementById('changeMyPinForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentPinInput = document.getElementById('currentPin').value;
+            const newPin = document.getElementById('newMyPin').value;
+            const confirmPin = document.getElementById('confirmMyPin').value;
+
+            // Verify current PIN
+            if (currentPinInput !== currentUser.pin) {
+                showToast('Kaody ankehitriny tsy mety!', 'error');
+                return;
+            }
+
+            // Validate new PIN
+            if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+                showToast('Kaody PIN vaovao dia 4 chiffres!', 'error');
+                return;
+            }
+
+            // Confirm match
+            if (newPin !== confirmPin) {
+                showToast('Kaody vaovao tsy mitovy!', 'error');
+                return;
+            }
+
+            // Check if PIN already exists for another user
+            const users = getUsers();
+            if (users.find(u => u.pin === newPin && u.id !== currentUser.id)) {
+                showToast('Efa misy io kaody io!', 'error');
+                return;
+            }
+
+            // Update PIN
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex].pin = newPin;
+                currentUser.pin = newPin;
+                saveUsers(users);
+                closeModal('changeMyPinModal');
+                showToast('Kaody PIN voaova!', 'success');
+            }
+        });
+
+        function openAddUserModal() {
+            document.getElementById('addUserForm').reset();
+            openModal('addUserModal');
+        }
+
+        document.getElementById('addUserForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('newUserName').value.trim();
+            const pin = document.getElementById('newUserPin').value;
+            const role = document.getElementById('newUserRole').value;
+
+            if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+                showToast('Kaody PIN dia 4 chiffres!', 'error');
+                return;
+            }
+
+            const users = getUsers();
+            
+            if (users.find(u => u.pin === pin)) {
+                showToast('Efa misy io kaody io!', 'error');
+                return;
+            }
+
+            users.push({
+                id: 'user_' + Date.now(),
+                name,
+                pin,
+                role
+            });
+
+            saveUsers(users);
+            closeModal('addUserModal');
+            loadUsers();
+            showToast(`Mpampiasa "${name}" voaforona!`, 'success');
+        });
+
+        function deleteUser(id) {
+            if (!confirm('Hamafa ity mpampiasa ity?')) return;
+            
+            let users = getUsers();
+            users = users.filter(u => u.id !== id);
+            saveUsers(users);
+            loadUsers();
+            showToast('Mpampiasa voafafa', 'success');
+        }
+
+        // ==================== STATISTICS ====================
+        function loadStats() {
+            const history = getHistory();
+            
+            if (history.length === 0) {
+                document.getElementById('statsContent').innerHTML = '<p style="color: var(--text-muted);">Tsy misy données</p>';
+                return;
+            }
+
+            const totalAll = history.reduce((sum, h) => sum + h.total, 0);
+            const avgCollection = totalAll / history.length;
+
+            // Group by month
+            const byMonth = {};
+            history.forEach(h => {
+                const month = h.date.substring(0, 7);
+                byMonth[month] = (byMonth[month] || 0) + h.total;
+            });
+
+            document.getElementById('statsContent').innerHTML = `
+                <div class="detail-row"><span class="detail-label">Isan'ny rakitra</span><span class="detail-value">${history.length}</span></div>
+                <div class="detail-row"><span class="detail-label">Totalin'ny rehetra</span><span class="detail-value" style="color: var(--success);">${formatCurrency(totalAll)}</span></div>
+                <div class="detail-row"><span class="detail-label">Salan'isa</span><span class="detail-value">${formatCurrency(avgCollection)}</span></div>
+                <h4 style="margin: 1rem 0 0.5rem;">📅 Isam-bolana:</h4>
+                ${Object.keys(byMonth).sort().reverse().slice(0, 6).map(month => `
+                    <div class="detail-row"><span>${month}</span><span class="detail-value">${formatCurrency(byMonth[month])}</span></div>
+                `).join('')}
+            `;
+        }
+
+        // ==================== PDF ====================
+        function saveAsPDF() {
+            const total = calculateGrandTotal();
+            if (total === 0) {
+                showToast('Tsy misy vola voaisa!', 'error');
+                return;
+            }
+            generatePDF(null);
+        }
+
+        function downloadPDF(id) {
+            generatePDF(id);
+        }
+
+        function generatePDF(collectionId) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            let data;
+            if (collectionId) {
+                const history = getHistory();
+                data = history.find(h => h.id === collectionId);
+            } else {
+                data = {
+                    date: document.getElementById('dateInput').value,
+                    category: document.getElementById('categoryInput').value || 'Tsy voafaritra',
+                    comptable1: document.getElementById('comptable1Name').value || '-',
+                    comptable2: document.getElementById('comptable2Name').value || '-',
+                    receiver: document.getElementById('receiverName').value || '-',
+                    total: calculateGrandTotal(),
+                    signatures
+                };
+            }
+
+            // Title
+            doc.setFontSize(18);
+            doc.setTextColor(26, 54, 93);
+            doc.text('FJKM Freiburg Fiderana', 105, 20, { align: 'center' });
+            doc.setFontSize(14);
+            doc.text('Fanisana Rakitra', 105, 28, { align: 'center' });
+
+            // Info
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Daty: ${formatDate(data.date)}`, 20, 45);
+            doc.text(`Sokajy: ${data.category}`, 20, 53);
+
+            // Details
+            let y = 65;
+            doc.setFontSize(12);
+            doc.setTextColor(26, 54, 93);
+            doc.text('Vola voaisana:', 20, y);
+            y += 8;
+
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+
+            if (collectionId && data.details) {
+                Object.keys(data.details).forEach(value => {
+                    const d = data.details[value];
+                    const label = parseFloat(value) >= 5 ? `${value} €` : `${parseFloat(value).toFixed(2).replace('.', ',')} €`;
+                    doc.text(`${label} x ${d.count} = ${formatCurrency(d.subtotal)}`, 25, y);
+                    y += 6;
+                });
+            } else {
+                [...BILLS, ...COINS].forEach(item => {
+                    const count = counts[item.value] || 0;
+                    if (count > 0) {
+                        const total = count * item.value;
+                        doc.text(`${item.label} x ${count} = ${formatCurrency(total)}`, 25, y);
+                        y += 6;
+                    }
+                });
+            }
+
+            // Total
+            y += 5;
+            doc.setFontSize(14);
+            doc.setTextColor(26, 54, 93);
+            doc.text(`TOTALY: ${formatCurrency(data.total)}`, 20, y);
+
+            // Signatures
+            y += 20;
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+
+            const sigs = data.signatures || signatures;
+
+            doc.text(`Mpanisa 1: ${data.comptable1}`, 20, y);
+            if (sigs.sig1) doc.addImage(sigs.sig1, 'PNG', 20, y + 2, 50, 15);
+            doc.line(20, y + 20, 70, y + 20);
+
+            doc.text(`Mpanisa 2: ${data.comptable2}`, 80, y);
+            if (sigs.sig2) doc.addImage(sigs.sig2, 'PNG', 80, y + 2, 50, 15);
+            doc.line(80, y + 20, 130, y + 20);
+
+            doc.text(`Mpandray: ${data.receiver}`, 140, y);
+            if (sigs.sig3) doc.addImage(sigs.sig3, 'PNG', 140, y + 2, 50, 15);
+            doc.line(140, y + 20, 190, y + 20);
+
+            const filename = `Rakitra-${data.date}-${data.category.replace(/\s+/g, '-')}.pdf`;
+            doc.save(filename);
+            showToast('PDF voatahiry!', 'success');
+        }
+
+        function exportAllHistory() {
+            const history = getHistory();
+            if (history.length === 0) {
+                showToast('Tsy misy tantara!', 'error');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(18);
+            doc.setTextColor(26, 54, 93);
+            doc.text('FJKM Freiburg Fiderana', 105, 20, { align: 'center' });
+            doc.setFontSize(14);
+            doc.text('Tantaran\'ny Rakitra Rehetra', 105, 28, { align: 'center' });
+
+            let y = 45;
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+
+            const totalAll = history.reduce((sum, h) => sum + h.total, 0);
+
+            doc.setFontSize(12);
+            doc.text(`Isan'ny rakitra: ${history.length}`, 20, y);
+            doc.text(`Totalin'ny rehetra: ${formatCurrency(totalAll)}`, 100, y);
+            y += 15;
+
+            doc.setFontSize(9);
+            history.forEach((item, index) => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text(`${index + 1}. ${item.date} | ${item.category} | ${formatCurrency(item.total)} | ${item.comptable1}, ${item.comptable2}`, 20, y);
+                y += 6;
+            });
+
+            doc.save('FJKM-Rakitra-Tantara-Rehetra.pdf');
+            showToast('PDF voatahiry!', 'success');
+        }
+
+        // ==================== RESET ====================
+        function resetForm() {
+            if (!confirm('Hamafa ny zavatra rehetra?')) return;
+
+            Object.keys(counts).forEach(value => {
+                counts[value] = 0;
+                const input = document.getElementById(`input_${value}`);
+                const total = document.getElementById(`total_${value}`);
+                if (input) input.value = 0;
+                if (total) total.textContent = '0,00 €';
+            });
+
+            document.getElementById('grandTotal').textContent = '0,00 €';
+            document.getElementById('categoryInput').value = '';
+            document.getElementById('comptable1Name').value = '';
+            document.getElementById('comptable2Name').value = '';
+            document.getElementById('receiverName').value = '';
+
+            clearSignature('sig1');
+            clearSignature('sig2');
+            clearSignature('sig3');
+
+            showToast('Voafafa daholo!', 'success');
+        }
+
+        // ==================== MODALS ====================
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // ==================== TOAST ====================
+        function showToast(message, type = '') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ==================== SERVICE WORKER ====================
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+    </script>
+</body>
+</html>
